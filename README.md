@@ -61,10 +61,10 @@ Execute the following commands to install the libraries:
 go get gorm.io/gorm
 go get gorm.io/driver/postgres
 go get gorm.io/driver/mysql
-go get github.com/gin-gonic/gin
 go get github.com/spf13/viper  
 go get github.com/go-playground/validator/v10
 
+go get github.com/gin-gonic/gin
 go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 go get google.golang.org/grpc
@@ -78,6 +78,8 @@ go get google.golang.org/grpc
 4. generate rpc -> protoc --go_out=. --go-grpc_out=. proto/user.proto
 5. protoc --go_out=. --go-grpc_out=. proto/product.proto
 5. add line grpc compiler option go_package = "./proto;proto"; 
+7. brew tap ktr0731/evans  ( testingg grp tools) ref : https://github.com/ktr0731/evans?tab=readme-ov-file#macos
+8. brew install evans ( testingg grp tools) ref : https://github.com/ktr0731/evans?tab=readme-ov-file#macos
 
    
 ## Setup
@@ -90,41 +92,14 @@ go get google.golang.org/grpc
 3. Product images for editing: /file/images/product_edit
 4. Product images: /file/images/product
 5. Dummy database data: /file/data_dummy
+ 
+## Set proto genrator 
+1. Create file Makefile
+2. Add setting genratord 
+3. make -B proto ( regenerate )
 
-## Data Insertion Order
-To ensure proper data relationships, insert data into the tables in the following order:
-
-```shellscript
--- 1. users
-INSERT INTO DOT_TEMP.users
-SELECT * FROM DOT.users;
-
--- 2. balances
-INSERT INTO DOT_TEMP.balances
-SELECT * FROM DOT.balances;
-
--- 3. currencies
-INSERT INTO DOT_TEMP.currencies
-SELECT * FROM DOT.currencies;
-
--- 4. companies
-INSERT INTO DOT_TEMP.companies
-SELECT * FROM DOT.companies;
-
-
--- 5. products
-INSERT INTO DOT_TEMP.products 
-SELECT *
-FROM DOT.products;
-
--- 6. product_prices
-INSERT INTO DOT_TEMP.product_prices
-SELECT * FROM DOT.product_prices;
-
--- 7. transactions
-INSERT INTO DOT_TEMP.transactions
-SELECT * FROM DOT.transactions;
-```
+## Testing Grpc 
+1. 
 
 ## Running the Project
 1. **Run the Project**  

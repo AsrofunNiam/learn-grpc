@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package proto;
 
-option go_package = "./proto;proto"; 
+option go_package = "github.com/AsrofunNiam/learn-grpc/pb;pb"; 
 
 // Definisikan servis untuk Product
 service ProductService {

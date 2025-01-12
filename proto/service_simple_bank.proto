@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package pb;
+import "rpc_create_user.proto";
+import "rpc_login_user.proto"; 
+option go_package = "github.com/AsrofunNiam/learn-grpc/pb;pb"; 
+
+service SimpleBankService {
+    rpc CreateUser (CreateUserRequest) returns (CreaUserResponse) {}
+    rpc LoginUser (LoginUserRequest) returns (LoginUserResponse) {}
+}
+

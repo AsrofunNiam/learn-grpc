@@ -1,19 +1,16 @@
 syntax = "proto3";
 
-package proto;
+package pb;
 
-option go_package = "./proto;proto"; 
+import "google/protobuf/timestamp.proto";
+option go_package = "github.com/AsrofunNiam/learn-grpc/pb;pb"; 
+ 
 
-service UserService {
-    rpc GetUserByID(GetUserRequest) returns (GetUserResponse);
-}
-
-message GetUserRequest {
-    int32 id = 1;
-}
-
-message GetUserResponse {
+message User {
     int32 id = 1;
     string name = 2;
     string email = 3;
+    google.protobuf.Timestamp created_at = 4;
+    google.protobuf.Timestamp updated_at = 5;
+
 }

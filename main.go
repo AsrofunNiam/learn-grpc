@@ -1,53 +1,74 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
+	"net/http"
 
-	"github.com/AsrofunNiam/learn-grpc/handler"
-	"github.com/AsrofunNiam/learn-grpc/proto"
-	"github.com/AsrofunNiam/learn-grpc/repository"
-	"github.com/AsrofunNiam/learn-grpc/service"
+	"github.com/AsrofunNiam/learn-grpc/app"
+	c "github.com/AsrofunNiam/learn-grpc/configuration"
+	"github.com/AsrofunNiam/learn-grpc/gapi"
+	"github.com/AsrofunNiam/learn-grpc/helper"
+	"github.com/AsrofunNiam/learn-grpc/pb"
+	"github.com/go-playground/validator/v10"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+	"gorm.io/gorm"
 )
 
-// Server struct mengimplementasikan interface proto.UserServiceServer
-type ServerUser struct {
-	proto.UnimplementedUserServiceServer
-}
-type ServerProduct struct {
-	proto.UnimplementedProductServiceServer
-}
-
 func main() {
-	// Initialize repositories
-	userRepo := repository.NewUserRepository()
-	productRepo := repository.NewProductRepository()
-
-	// Initialize services
-	userService := service.NewUserService(userRepo)
-	productService := service.NewProductService(productRepo)
-
-	// Initialize handlers
-	userHandler := handler.NewUserHandler(userService)
-	productHandler := handler.NewProductHandler(productService)
-
-	// Set up the gRPC server
-	lis, err := net.Listen("tcp", ":50051")
+	// Load configuration
+	configuration, err := c.LoadConfig()
 	if err != nil {
-		log.Fatalf("Failed to listen: %v", err)
+		log.Fatalln("Failed to load configuration:", err)
+	}
+
+	// Connect to database
+	db := app.ConnectDatabase(configuration.User, configuration.Host, configuration.Password, configuration.PortDB, configuration.Db)
+
+	// Run gRPC server in a separate goroutine
+	go func() {
+		runGrpcServer(configuration, db)
+	}()
+
+	// Initialize and run HTTP server
+	validate := validator.New()
+	router := app.NewRouter(db, validate)
+	port := configuration.HttpPort
+
+	server := http.Server{
+		Addr:    ":" + port,
+		Handler: router,
+	}
+
+	log.Printf("HTTP server is running on port %s", port)
+	err = server.ListenAndServe()
+	helper.PanicIfError(err)
+}
+
+func runGrpcServer(config c.Configuration, store *gorm.DB) {
+	// Initialize gRPC server
+	server, err := gapi.NewServer(config, store)
+	if err != nil {
+		log.Fatal("Cannot create gRPC server:", err)
 	}
 
 	grpcServer := grpc.NewServer()
 
-	// Register services
-	proto.RegisterUserServiceServer(grpcServer, &ServerUser{})
-	proto.RegisterProductServiceServer(grpcServer, &ServerProduct{})
+	// Register services and reflection
+	pb.RegisterSimpleBankServiceServer(grpcServer, server)
+	reflection.Register(grpcServer)
 
-	fmt.Println("gRPC server is running on port 50051")
+	// Start listening on gRPC port
+	listener, err := net.Listen("tcp", ":"+config.GRPCPort)
 
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("Failed to serve: %v", err)
+	if err != nil {
+		log.Fatal("Cannot create gRPC listener:", err)
+	}
+
+	log.Printf("gRPC server is running on %s", listener.Addr().String())
+	err = grpcServer.Serve(listener)
+	if err != nil {
+		log.Fatal("Cannot start gRPC server:", err)
 	}
 }
