@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "./proto;proto"; 
+
+// Definisikan servis untuk Product
+service ProductService {
+    // RPC untuk mendapatkan Product berdasarkan ID
+    rpc GetProductByID(GetProductRequest) returns (GetProductResponse);
+}
+
+// Definisikan message untuk request Product berdasarkan ID
+message GetProductRequest {
+    int32 id = 1; // ID produk
+}
+
+// Definisikan message untuk response Product
+message GetProductResponse {
+    int32 id = 1;    // ID produk
+    string name = 2;  // Nama produk
+    double price = 3; // Harga produk
+}

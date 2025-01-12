@@ -1,55 +1,53 @@
 package main
 
 import (
-	"context"
+	"fmt"
 	"log"
 	"net"
 
+	"github.com/AsrofunNiam/learn-grpc/handler"
 	"github.com/AsrofunNiam/learn-grpc/proto"
+	"github.com/AsrofunNiam/learn-grpc/repository"
+	"github.com/AsrofunNiam/learn-grpc/service"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 // Server struct mengimplementasikan interface proto.UserServiceServer
-type Server struct {
+type ServerUser struct {
 	proto.UnimplementedUserServiceServer
 }
-
-// GetUserByID adalah implementasi dari RPC
-func (s *Server) GetUserByID(ctx context.Context, req *proto.GetUserRequest) (*proto.GetUserResponse, error) {
-	// Dummy data
-	userData := map[int32]*proto.GetUserResponse{
-		1: {Id: 1, Name: "John Doe", Email: "john.doe@example.com"},
-		2: {Id: 2, Name: "Jane Smith", Email: "jane.smith@example.com"},
-	}
-
-	// Cari user berdasarkan ID
-	if user, found := userData[req.Id]; found {
-		return user, nil
-	}
-
-	// Jika tidak ditemukan, kembalikan error
-	return nil, grpc.Errorf(grpc.Code(grpc.ErrClientConnTimeout), "User not found")
+type ServerProduct struct {
+	proto.UnimplementedProductServiceServer
 }
 
 func main() {
-	// Listener untuk server
-	listener, err := net.Listen("tcp", ":50051")
+	// Initialize repositories
+	userRepo := repository.NewUserRepository()
+	productRepo := repository.NewProductRepository()
+
+	// Initialize services
+	userService := service.NewUserService(userRepo)
+	productService := service.NewProductService(productRepo)
+
+	// Initialize handlers
+	userHandler := handler.NewUserHandler(userService)
+	productHandler := handler.NewProductHandler(productService)
+
+	// Set up the gRPC server
+	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
-		log.Fatalf("Failed to listen on port 50051: %v", err)
+		log.Fatalf("Failed to listen: %v", err)
 	}
 
-	// Inisialisasi gRPC server
 	grpcServer := grpc.NewServer()
 
-	// Registrasi service
-	proto.RegisterUserServiceServer(grpcServer, &Server{})
+	// Register services
+	proto.RegisterUserServiceServer(grpcServer, &ServerUser{})
+	proto.RegisterProductServiceServer(grpcServer, &ServerProduct{})
 
-	// Reflection untuk debugging dengan tools seperti grpcurl
-	reflection.Register(grpcServer)
+	fmt.Println("gRPC server is running on port 50051")
 
-	log.Println("gRPC server is running on port 50051")
-	if err := grpcServer.Serve(listener); err != nil {
-		log.Fatalf("Failed to serve gRPC server: %v", err)
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("Failed to serve: %v", err)
 	}
 }
