@@ -53,7 +53,7 @@ func runGrpcServer(config c.Configuration, store *gorm.DB) {
 		log.Fatal("Cannot create gRPC server:", err)
 	}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer() // Create gRPC server
 
 	// Register services and reflection
 	pb.RegisterSimpleBankServiceServer(grpcServer, server)
