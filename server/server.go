@@ -19,9 +19,9 @@ type server struct {
 // Implementasi SayHelloBroh
 func (s *server) SayHelloBroh(ctx context.Context, req *hello.HelloRequest) (*hello.HelloResponse, error) {
 	response := &hello.HelloResponse{
-		Name:    req.GetName(),
-		Age:     req.GetAge(),
-		Address: req.GetAddress(),
+		Name:      req.GetName(),
+		Age:       req.GetAge(),
+		Addresses: req.GetAddresses(),
 	}
 	return response, nil
 }

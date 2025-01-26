@@ -26,9 +26,12 @@ func main() {
 
 	// request value
 	request := &hello.HelloRequest{
-		Name:    "Alice",
-		Age:     25,
-		Address: "Wonderland",
+		Name: "Alice",
+		Age:  25,
+		Addresses: []*hello.Address{
+			{Street: "Jalan Raya", City: "Bandung", Country: "Indonesia"},
+			{Street: "Jalan Raya Jakarta ", City: "Jakarta ", Country: "Indonesia"},
+		},
 	}
 
 	// Set timeout request context
@@ -43,5 +46,5 @@ func main() {
 
 	// response result
 	fmt.Printf("Response from server: Name: %s, Age: %d, Address: %s\n",
-		response.GetName(), response.GetAge(), response.GetAddress())
+		response.GetName(), response.GetAge(), response.Addresses)
 }

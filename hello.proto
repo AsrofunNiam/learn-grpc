@@ -8,20 +8,20 @@ service Greeter {
   rpc SayHelloBroh (HelloRequest) returns (HelloResponse);
 }
 
+message Address {
+  string street = 1; // Screet
+  string city = 2;   // City
+  string country = 3; // Country
+}
+
 message HelloRequest {
   string name = 1;
   int32 age = 2;
-  string address = 3;
+  repeated Address addresses = 3; // Implemnt struct Address
 }
-
-// message HelloReply {
-//   string message = 1;
-//   int32 age = 2;
-//   string address = 3;
-// }
 
 message HelloResponse {
   string name = 1;
   int32 age = 2;
-  string address = 3;
+  repeated Address addresses = 3; // Implemnt struct Address
 }
