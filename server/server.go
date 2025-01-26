@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net"
 
@@ -12,28 +11,39 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
+// Server struct
 type server struct {
 	hello.UnimplementedGreeterServer
 }
 
-func (s *server) SayHelloBroh(ctx context.Context, req *hello.HelloRequest) (*hello.HelloReply, error) {
-	return &hello.HelloReply{Message: "Hello, " + req.GetName()}, nil
+// Implementasi SayHelloBroh
+func (s *server) SayHelloBroh(ctx context.Context, req *hello.HelloRequest) (*hello.HelloResponse, error) {
+	response := &hello.HelloResponse{
+		Name:    req.GetName(),
+		Age:     req.GetAge(),
+		Address: req.GetAddress(),
+	}
+	return response, nil
 }
+
 func main() {
-	// Mengatur listener pada port 50051
+	// Listen di port 50051
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	// Membuat server gRPC baru
-	s := grpc.NewServer()
-	hello.RegisterGreeterServer(s, &server{})
-	reflection.Register(s)
+	// GRPC server connection
+	grpcServer := grpc.NewServer()
 
-	// Menjalankan server
-	fmt.Println("Server is running on port 50051...")
-	if err := s.Serve(lis); err != nil {
+	// Register Greeter service
+	hello.RegisterGreeterServer(grpcServer, &server{})
+
+	// Register reflection client on other tools ( postman, other grpc client )
+	reflection.Register(grpcServer)
+
+	log.Println("Server is running on port :50051")
+	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
 }

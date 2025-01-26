@@ -5,13 +5,23 @@ package hello;
 option go_package = "./hello"; // Menentukan path Go package
 
 service Greeter {
-  rpc SayHelloBroh (HelloRequest) returns (HelloReply);
+  rpc SayHelloBroh (HelloRequest) returns (HelloResponse);
 }
 
 message HelloRequest {
   string name = 1;
+  int32 age = 2;
+  string address = 3;
 }
 
-message HelloReply {
-  string message = 1;
+// message HelloReply {
+//   string message = 1;
+//   int32 age = 2;
+//   string address = 3;
+// }
+
+message HelloResponse {
+  string name = 1;
+  int32 age = 2;
+  string address = 3;
 }

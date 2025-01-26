@@ -6,33 +6,42 @@ import (
 	"log"
 	"time"
 
-	"github.com/AsrofunNiam/learn-grpc/hello" // Sesuaikan dengan path proyekmu
+	"github.com/AsrofunNiam/learn-grpc/hello"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
-	// Membuka koneksi ke server
-	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+	// Koneksi ke server gRPC
+	conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
 
-	// Membuat client gRPC
-	c := hello.NewGreeterClient(conn)
+	// Client Greeter
+	client := hello.NewGreeterClient(conn)
 
-	// Membuat context dengan timeout 1 detik
+	// request value
+	request := &hello.HelloRequest{
+		Name:    "Alice",
+		Age:     25,
+		Address: "Wonderland",
+	}
+
+	// Set timeout request context
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	// Memanggil RPC SayHello
-	// r, err := c.SayHelloBroh(ctx, &hello.HelloRequest{Name: "testing"})
-	r, err := c.SayHelloBroh(ctx, &hello.HelloRequest{Name: "testing"})
+	// Send request to server
+	response, err := client.SayHelloBroh(ctx, request)
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
 
-	// Menampilkan hasil
-	fmt.Println("Greeting:", r.GetMessage())
+	// response result
+	fmt.Printf("Response from server: Name: %s, Age: %d, Address: %s\n",
+		response.GetName(), response.GetAge(), response.GetAddress())
 }
