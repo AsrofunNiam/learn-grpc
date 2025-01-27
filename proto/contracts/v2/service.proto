@@ -1,21 +1,19 @@
 syntax = "proto3";
 
+package hello;
+import "contracts/v2/hello.proto";
+import "google/api/annotations.proto";     // Import file yang diperlukan
+import "google/api/http.proto";
 
-package cfp.api.pikatan.v2;
-option go_package = "../v2"; // Path Go package
-
-import "google/api/annotations.proto";   
-import "cfp/api/pikatan/v2/hello.proto";
+// Tentukan go_package untuk file ini
+option go_package = "../v2"; // Sesuaikan dengan path Go package Anda
 
 service Greeter {
-  // gRPC method biasa
-  rpc SayHelloBroh (HelloRequest) returns (HelloResponse);
-
-  // gRPC-Gateway dengan HTTP binding
+  rpc SayHelloBroh (HelloRequest) returns (HelloResponse); // Service yang tetap ada
   rpc SayHelloGrpcGateway (HelloRequest) returns (HelloResponse) {
     option (google.api.http) = {
-      post: "/v1/hello" // Endpoint HTTP
-      body: "*"         // Semua body diteruskan ke HelloRequest
+      post: "/v1/hello"
+      body: "*" // Body request HTTP diteruskan ke HelloRequest
     };
   }
 }

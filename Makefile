@@ -1,27 +1,9 @@
-# # Aturan Makefile
-# .PHONY: proto clean
-
-# # Generate proto
-# proto:
-# 	protoc --proto_path=proto --go_out=pb --go_opt=paths=source_relative \
-# 	       --go-grpc_out=pb --go-grpc_opt=paths=source_relative \
-# 	       proto/*.proto
-
-# # Bersihkan hasil generate
-# clean:
-# 	rm -rf pb/*
-
-# # Aturan default
-# .DEFAULT_GOAL := proto
-
 .PHONY: proto clean
 
 # Define all proto files
 PROTO_FILES := \
 	proto/contracts/v2/hello.proto \
-	proto/contracts/v2/service.proto \
-	proto/contracts/v2/product.proto \
-	proto/googleapis/google/api/annotations.proto
+	proto/contracts/v2/service.proto
 
 # Generate proto
 proto:

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package cfp.api.pikatan.v2;
+package hello;
 option go_package = "../v2"; // Menentukan path Go package
 
 // File ini hanya digunakan untuk mendefinisikan model protobuf tanpa service.
