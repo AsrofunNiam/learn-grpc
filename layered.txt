@@ -1,0 +1,34 @@
+learn-grpc/
+├── proto/                          # Direktori untuk semua file protobuf
+│   ├── contracts/                  # Semua definisi protobuf dibagi berdasarkan versi
+│   │   ├── v1/                     # Versi 1 definisi protobuf
+│   │   │   └── hello.proto         # Definisi protobuf untuk fitur Hello (v1)
+│   │   ├── v2/                     # Versi 2 definisi protobuf (utama)
+│   │       ├── hello.proto         # Protobuf untuk fitur Hello (hanya generate model proto)
+│   │       ├── service.proto       # Semua service untuk gRPC dan gRPC-Gateway
+│   │       └── product.proto       # Protobuf untuk fitur Product
+│   ├── test/                       # Implement testing proto
+|   |
+│   └── googleapis/                 # Dependensi eksternal (annotations, dll.)
+│       └── google/api/
+│           └── annotations.proto   # Anotasi untuk mendukung HTTP/gRPC-Gateway
+│
+├── use_case/                       # Direktori untuk logika bisnis aplikasi
+│   ├── hello/                      # Use case untuk fitur Hello
+│   │   └── hello.go                # Implementasi logika bisnis fitur Hello
+|   |
+│   └── product/                    # Use case untuk fitur Product
+│       └── (file terkait service Product)
+│
+├── server/                         # Direktori server utama
+│   └── main.go                     # Entry point untuk server gRPC
+│
+├── postgres/                       # Direktori untuk operasi database PostgreSQL
+│   └── product.go                  # Operasi database terkait fitur Product
+│
+├── main.go                         # Entry point untuk client aplikasi
+├── go.mod                          # File Go module (github.com/AsrofunNiam/learn-grpc)
+├── go.sum                          # File sum untuk dependensi Go
+├── makefile                        # Makefile untuk build/test aplikasi
+├── layer.txt                       # Architercure project 
+├── README.md                       # Dokumentasi proyek
