@@ -69,6 +69,8 @@ go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 go get google.golang.org/grpc
 go get google.golang.org/grpc google.golang.org/protobuf github.com/grpc-ecosystem/grpc-gateway/v2
+go get github.com/grpc-ecosystem/grpc-gateway/v2/runtime
+
 
 ```
 
@@ -79,6 +81,15 @@ go get google.golang.org/grpc google.golang.org/protobuf github.com/grpc-ecosyst
 4. generate rpc -> protoc --go_out=. --go-grpc_out=. proto/user.proto
 5. protoc --go_out=. --go-grpc_out=. proto/product.proto
 5. add line grpc compiler option go_package = "./proto;proto"; 
+
+## Generate proto 
+1. Default grpc proto : $protoc --go_out=. --go-grpc_out=. hello.proto
+2. Default grpc-Gatyeway /repositoty : $protoc --proto_path=/Users/pintu/Documents/PROJECT/OPEN-SOURCE/LETS-CODE/learn-grpc --proto_path=/Users/pintu/Documents/PROJECT/OPEN-SOURCE/LETS-CODE/learn-grpc/googleapis --go_out=. --go-grpc_out=. --grpc-gateway_out=. hello.proto
+3. Default grpc-Gatyeway /reposiotry/proto : protoc --proto_path=/Users/pintu/Documents/PROJECT/OPEN-SOURCE/LETS-CODE/learn-grpc --proto_path=/Users/pintu/Documents/PROJECT/OPEN-SOURCE/LETS-CODE/learn-grpc/googleapis --go_out=. --go-grpc_out=. --grpc-gateway_out=. proto/hello.proto
+
+
+
+
 
    
 ## Setup
@@ -95,37 +106,6 @@ go get google.golang.org/grpc google.golang.org/protobuf github.com/grpc-ecosyst
 ## Data Insertion Order
 To ensure proper data relationships, insert data into the tables in the following order:
 
-```shellscript
--- 1. users
-INSERT INTO DOT_TEMP.users
-SELECT * FROM DOT.users;
-
--- 2. balances
-INSERT INTO DOT_TEMP.balances
-SELECT * FROM DOT.balances;
-
--- 3. currencies
-INSERT INTO DOT_TEMP.currencies
-SELECT * FROM DOT.currencies;
-
--- 4. companies
-INSERT INTO DOT_TEMP.companies
-SELECT * FROM DOT.companies;
-
-
--- 5. products
-INSERT INTO DOT_TEMP.products 
-SELECT *
-FROM DOT.products;
-
--- 6. product_prices
-INSERT INTO DOT_TEMP.product_prices
-SELECT * FROM DOT.product_prices;
-
--- 7. transactions
-INSERT INTO DOT_TEMP.transactions
-SELECT * FROM DOT.transactions;
-```
 
 ## Running the Project
 1. **Run the Project**  
