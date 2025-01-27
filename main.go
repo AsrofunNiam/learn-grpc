@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/AsrofunNiam/learn-grpc/hello"
+	service "github.com/AsrofunNiam/learn-grpc/proto/contracts/v2/contracts/v2"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -22,13 +22,13 @@ func main() {
 	defer conn.Close()
 
 	// Client Greeter
-	client := hello.NewGreeterClient(conn)
+	client := service.NewGreeterClient(conn)
 
 	// request value
-	request := &hello.HelloRequest{
+	request := &service.HelloRequest{
 		Name: "Alice",
 		Age:  25,
-		Addresses: []*hello.Address{
+		Addresses: []*service.Address{
 			{Street: "Jalan Raya", City: "Bandung", Country: "Indonesia"},
 			{Street: "Jalan Raya Jakarta ", City: "Jakarta ", Country: "Indonesia"},
 		},
