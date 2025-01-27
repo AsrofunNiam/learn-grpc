@@ -10,33 +10,30 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	service "github.com/AsrofunNiam/learn-grpc/proto/contracts/v2/contracts/v2"
+	v2 "github.com/AsrofunNiam/learn-grpc/proto/contracts/v2/contracts/v2"
+	"github.com/AsrofunNiam/learn-grpc/usecase/hello"
+	"github.com/AsrofunNiam/learn-grpc/worker"
 )
 
 type server struct {
-	service.UnimplementedGreeterServer
+	v2.UnimplementedGreeterServer
+	worker *worker.HelloWorker
 }
 
-// Implementasi metode SayHelloGrpcGateway
-func (s *server) SayHelloGrpcGateway(ctx context.Context, req *service.HelloRequest) (*service.HelloResponse, error) {
-	return &service.HelloResponse{
-		Name:      req.Name,
-		Age:       req.Age,
-		Addresses: req.Addresses,
-	}, nil
+func (s *server) SayHelloGrpcGateway(ctx context.Context, req *v2.HelloRequest) (*v2.HelloResponse, error) {
+	return s.worker.HandleHelloGateway(ctx, req)
 }
 
-// Implementasi SayHelloBroh
-func (s *server) SayHelloBroh(ctx context.Context, req *service.HelloRequest) (*service.HelloResponse, error) {
-	response := &service.HelloResponse{
-		Name:      req.GetName(),
-		Age:       req.GetAge(),
-		Addresses: req.GetAddresses(),
-	}
-	return response, nil
+func (s *server) SayHelloBroh(ctx context.Context, req *v2.HelloRequest) (*v2.HelloResponse, error) {
+	return s.worker.HandleHelloRequest(ctx, req)
 }
 
 func main() {
+
+	// Inisialisasi usecase
+	helloUsecase := hello.NewUsecase()
+	helloWorker := worker.NewHelloWorker(worker.HelloWorkerConfig{}, helloUsecase)
+
 	// Start gRPC server
 	go func() {
 		listener, err := net.Listen("tcp", ":50051")
@@ -45,7 +42,7 @@ func main() {
 		}
 
 		grpcServer := grpc.NewServer()
-		service.RegisterGreeterServer(grpcServer, &server{})
+		v2.RegisterGreeterServer(grpcServer, &server{worker: helloWorker})
 
 		log.Println("gRPC server is running on port 50051")
 		if err := grpcServer.Serve(listener); err != nil {
@@ -54,13 +51,12 @@ func main() {
 	}()
 
 	// Start HTTP server for gRPC-Gateway
-	mux := runtime.NewServeMux() // Inisialisasi multiplexer HTTP-Gateway
+	mux := runtime.NewServeMux()
 
-	// Register gRPC-Gateway handler
-	err := service.RegisterGreeterHandlerFromEndpoint(
+	err := v2.RegisterGreeterHandlerFromEndpoint(
 		context.Background(),
 		mux,
-		"localhost:50051", // Alamat server gRPC
+		"localhost:50051",
 		[]grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())},
 	)
 	if err != nil {

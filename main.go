@@ -6,31 +6,29 @@ import (
 	"log"
 	"time"
 
-	service "github.com/AsrofunNiam/learn-grpc/proto/contracts/v2/contracts/v2"
-
+	v2 "github.com/AsrofunNiam/learn-grpc/proto/contracts/v2/contracts/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
 	// Koneksi ke server gRPC
-	conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
-
+	conn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
 
 	// Client Greeter
-	client := service.NewGreeterClient(conn)
+	client := v2.NewGreeterClient(conn)
 
-	// request value
-	request := &service.HelloRequest{
+	// Request value
+	request := &v2.HelloRequest{
 		Name: "Alice",
 		Age:  25,
-		Addresses: []*service.Address{
+		Addresses: []*v2.Address{
 			{Street: "Jalan Raya", City: "Bandung", Country: "Indonesia"},
-			{Street: "Jalan Raya Jakarta ", City: "Jakarta ", Country: "Indonesia"},
+			{Street: "Jalan Jakarta", City: "Jakarta", Country: "Indonesia"},
 		},
 	}
 
@@ -44,7 +42,7 @@ func main() {
 		log.Fatalf("could not greet: %v", err)
 	}
 
-	// response result
-	fmt.Printf("Response from server: Name: %s, Age: %d, Address: %s\n",
-		response.GetName(), response.GetAge(), response.Addresses)
+	// Response result
+	fmt.Printf("Response from server: Name: %s, Age: %d, Address: %v\n",
+		response.GetName(), response.GetAge(), response.GetAddresses())
 }
