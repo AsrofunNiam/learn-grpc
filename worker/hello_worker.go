@@ -6,6 +6,7 @@ import (
 
 	v2 "github.com/AsrofunNiam/learn-grpc/proto/contracts/v2/contracts/v2"
 	"github.com/AsrofunNiam/learn-grpc/usecase/hello"
+	"gorm.io/gorm"
 )
 
 type HelloWorkerConfig struct {
@@ -13,18 +14,20 @@ type HelloWorkerConfig struct {
 }
 
 type HelloWorker struct {
-	config  HelloWorkerConfig
-	usecase hello.Usecase
+	Config  HelloWorkerConfig
+	Usecase hello.Usecase
+	Db      *gorm.DB
 }
 
-func NewHelloWorker(config HelloWorkerConfig, usecase hello.Usecase) *HelloWorker {
-	if config.Interval == 0 {
-		config.Interval = 5 * time.Second // Default interval jika tidak disetel
-	}
-
+func NewHelloWorker(
+	config HelloWorkerConfig,
+	usecase hello.Usecase,
+	db *gorm.DB,
+) *HelloWorker {
 	return &HelloWorker{
-		config:  config,
-		usecase: usecase,
+		Config:  config,
+		Usecase: usecase,
+		Db:      db,
 	}
 }
 
@@ -35,11 +38,11 @@ func (w *HelloWorker) Name() string {
 
 // HandleHelloRequest menangani request dan memprosesnya menggunakan usecase
 func (w *HelloWorker) HandleHelloRequest(ctx context.Context, req *v2.HelloRequest) (*v2.HelloResponse, error) {
-	response := w.usecase.SayHello(req)
+	response := w.Usecase.SayHello(req)
 	return response, nil
 }
 
 func (w *HelloWorker) HandleHelloGateway(ctx context.Context, req *v2.HelloRequest) (*v2.HelloResponse, error) {
-	response := w.usecase.SayHello(req)
+	response := w.Usecase.SayHello(req)
 	return response, nil
 }

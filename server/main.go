@@ -10,6 +10,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	"github.com/AsrofunNiam/learn-grpc/configuration"
+	"github.com/AsrofunNiam/learn-grpc/database"
 	v2 "github.com/AsrofunNiam/learn-grpc/proto/contracts/v2/contracts/v2"
 	"github.com/AsrofunNiam/learn-grpc/usecase/hello"
 	"github.com/AsrofunNiam/learn-grpc/worker"
@@ -30,9 +32,17 @@ func (s *server) SayHelloBroh(ctx context.Context, req *v2.HelloRequest) (*v2.He
 
 func main() {
 
+	configuration, err := configuration.LoadConfig()
+	if err != nil {
+		log.Fatalln("Failed at config", err)
+	}
+
+	port := configuration.Port
+	db := database.ConnectDatabase(configuration.User, configuration.Host, configuration.Password, configuration.PortDB, configuration.Db)
+
 	// Inisialisasi usecase
 	helloUsecase := hello.NewUsecase()
-	helloWorker := worker.NewHelloWorker(worker.HelloWorkerConfig{}, helloUsecase)
+	helloWorker := worker.NewHelloWorker(worker.HelloWorkerConfig{}, helloUsecase, db)
 
 	// Start gRPC server
 	go func() {
@@ -53,7 +63,7 @@ func main() {
 	// Start HTTP server for gRPC-Gateway
 	mux := runtime.NewServeMux()
 
-	err := v2.RegisterGreeterHandlerFromEndpoint(
+	err = v2.RegisterGreeterHandlerFromEndpoint(
 		context.Background(),
 		mux,
 		"localhost:50051",
@@ -63,8 +73,8 @@ func main() {
 		log.Fatalf("failed to start HTTP server: %v", err)
 	}
 
-	log.Println("HTTP server is running on port 8080")
-	if err := http.ListenAndServe(":8080", mux); err != nil {
+	log.Println("HTTP server is running on port : ", port)
+	if err := http.ListenAndServe(port, mux); err != nil {
 		log.Fatalf("failed to serve HTTP: %v", err)
 	}
 }
