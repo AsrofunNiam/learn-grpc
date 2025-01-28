@@ -13,6 +13,7 @@ import (
 	"github.com/AsrofunNiam/learn-grpc/configuration"
 	"github.com/AsrofunNiam/learn-grpc/database"
 	v2 "github.com/AsrofunNiam/learn-grpc/proto/contracts/v2/contracts/v2"
+	"github.com/AsrofunNiam/learn-grpc/repository"
 	"github.com/AsrofunNiam/learn-grpc/usecase/hello"
 	"github.com/AsrofunNiam/learn-grpc/worker"
 )
@@ -41,7 +42,8 @@ func main() {
 	db := database.ConnectDatabase(configuration.User, configuration.Host, configuration.Password, configuration.PortDB, configuration.Db)
 
 	// Inisialisasi usecase
-	helloUsecase := hello.NewUsecase()
+	productRepository := repository.NewProductRepository()
+	helloUsecase := hello.NewUsecase(productRepository, db)
 	helloWorker := worker.NewHelloWorker(worker.HelloWorkerConfig{}, helloUsecase, db)
 
 	// Start gRPC server
@@ -73,8 +75,8 @@ func main() {
 		log.Fatalf("failed to start HTTP server: %v", err)
 	}
 
-	log.Println("HTTP server is running on port : ", port)
-	if err := http.ListenAndServe(port, mux); err != nil {
+	log.Println("HTTP server is running on port:", configuration.Port)
+	if err := http.ListenAndServe(":"+port, mux); err != nil {
 		log.Fatalf("failed to serve HTTP: %v", err)
 	}
 }

@@ -43,6 +43,6 @@ func (w *HelloWorker) HandleHelloRequest(ctx context.Context, req *v2.HelloReque
 }
 
 func (w *HelloWorker) HandleHelloGateway(ctx context.Context, req *v2.HelloRequest) (*v2.HelloResponse, error) {
-	response := w.Usecase.SayHello(req)
+	response := w.Usecase.SayHelloGateway(req)
 	return response, nil
 }
