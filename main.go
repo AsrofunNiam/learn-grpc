@@ -1,53 +1,48 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
-	"net"
+	"time"
 
-	"github.com/AsrofunNiam/learn-grpc/handler"
-	"github.com/AsrofunNiam/learn-grpc/proto"
-	"github.com/AsrofunNiam/learn-grpc/repository"
-	"github.com/AsrofunNiam/learn-grpc/service"
+	v2 "github.com/AsrofunNiam/learn-grpc/proto/contracts/v2/contracts/v2"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
-// Server struct mengimplementasikan interface proto.UserServiceServer
-type ServerUser struct {
-	proto.UnimplementedUserServiceServer
-}
-type ServerProduct struct {
-	proto.UnimplementedProductServiceServer
-}
-
 func main() {
-	// Initialize repositories
-	userRepo := repository.NewUserRepository()
-	productRepo := repository.NewProductRepository()
-
-	// Initialize services
-	userService := service.NewUserService(userRepo)
-	productService := service.NewProductService(productRepo)
-
-	// Initialize handlers
-	userHandler := handler.NewUserHandler(userService)
-	productHandler := handler.NewProductHandler(productService)
-
-	// Set up the gRPC server
-	lis, err := net.Listen("tcp", ":50051")
+	// Koneksi ke server gRPC
+	conn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("Failed to listen: %v", err)
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+
+	// Client Greeter
+	client := v2.NewGreeterClient(conn)
+
+	// Request value
+	request := &v2.HelloRequest{
+		Name: "Alice",
+		Age:  25,
+		Addresses: []*v2.Address{
+			{Street: "Jalan Raya", City: "Bandung", Country: "Indonesia"},
+			{Street: "Jalan Jakarta", City: "Jakarta", Country: "Indonesia"},
+		},
 	}
 
-	grpcServer := grpc.NewServer()
+	// Set timeout request context
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
 
-	// Register services
-	proto.RegisterUserServiceServer(grpcServer, &ServerUser{})
-	proto.RegisterProductServiceServer(grpcServer, &ServerProduct{})
-
-	fmt.Println("gRPC server is running on port 50051")
-
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("Failed to serve: %v", err)
+	// Send request to server
+	response, err := client.SayHelloBroh(ctx, request)
+	if err != nil {
+		log.Fatalf("could not greet: %v", err)
 	}
+
+	// Response result
+	fmt.Printf("Response from server: Name: %s, Age: %d, Address: %v\n",
+		response.GetName(), response.GetAge(), response.GetAddresses())
 }

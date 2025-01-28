@@ -1,20 +1,70 @@
 package repository
 
 import (
-	"context"
+	"time"
 
-	model "github.com/AsrofunNiam/learn-grpc/model/domain"
+	"github.com/AsrofunNiam/learn-grpc/helper"
+	"github.com/AsrofunNiam/learn-grpc/model"
+	"gorm.io/gorm"
 )
 
-type ProductRepository struct {
-	// connection or db client
+type ProductRepository interface {
+	FindAll(db *gorm.DB, filters *map[string]string) model.Products
+	FindByID(db *gorm.DB, id uint) model.Product
+	Create(db *gorm.DB, Product *model.Product) (*model.Product, error)
+	Update(db *gorm.DB, Product *model.Product) *model.Product
+	Delete(db *gorm.DB, id, deletedByID uint)
 }
 
-func NewProductRepository() *ProductRepository {
-	return &ProductRepository{}
+type ProductRepositoryImpl struct {
 }
 
-func (r *ProductRepository) GetProductByID(ctx context.Context, id int32) (*model.Product, error) {
-	// Simulasikan pengambilan data dari database
-	return &model.Product{ID: id, Name: "Laptop", Price: 1000}, nil
+func NewProductRepository() ProductRepository {
+	return &ProductRepositoryImpl{}
+}
+
+func (repository *ProductRepositoryImpl) FindAll(db *gorm.DB, filters *map[string]string) model.Products {
+	products := model.Products{}
+	currentDate := time.Now().Format("2006-01-02")
+	tx := db.Model(&model.Product{})
+
+	err := tx.Preload("ProductPrice", "start_date <= ? AND end_date >= ?", currentDate, currentDate).Preload("Company").Find(&products).Error
+	helper.PanicIfError(err)
+
+	return products
+}
+
+func (repository *ProductRepositoryImpl) FindByID(db *gorm.DB, id uint) model.Product {
+	var product model.Product
+	err := db.First(&product, id).Error
+	helper.PanicIfError(err)
+	return product
+}
+
+func (repository *ProductRepositoryImpl) Create(db *gorm.DB, product *model.Product) (*model.Product, error) {
+	err := db.Create(&product).Error
+	if err != nil {
+		return nil, err
+	}
+	return product, nil
+}
+
+func (repository *ProductRepositoryImpl) Update(db *gorm.DB, product *model.Product) *model.Product {
+	err := db.Updates(&product).First(&product).Error
+	helper.PanicIfError(err)
+
+	return product
+}
+
+func (repository *ProductRepositoryImpl) Delete(db *gorm.DB, id, deletedByID uint) {
+	err := db.First(&model.Product{}, id).Error
+	helper.PanicIfError(err)
+
+	// soft delete
+	err = db.Updates(&model.Product{
+		Model:       gorm.Model{ID: uint(id)},
+		DeletedByID: deletedByID,
+	}).Error
+
+	helper.PanicIfError(err)
 }

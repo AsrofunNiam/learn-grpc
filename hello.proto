@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package hello;
+
+option go_package = "./hello"; // Menentukan path Go package
+
+import "google/api/annotations.proto"; // Import gRPC-Gateway annotations
+
+service Greeter {
+  rpc SayHelloBroh (HelloRequest) returns (HelloResponse); // Service yang tetap ada
+  rpc SayHelloGrpcGateway (HelloRequest) returns (HelloResponse) {
+    option (google.api.http) = {
+      post: "/v1/hello"
+      body: "*" // Body request HTTP diteruskan ke HelloRequest
+    };
+  }
+}
+
+message Address {
+  string street = 1; // Street
+  string city = 2;   // City
+  string country = 3; // Country
+}
+
+message HelloRequest {
+  string name = 1;
+  int32 age = 2;
+  repeated Address addresses = 3; // Implementasi struct Address
+}
+
+message HelloResponse {
+  string name = 1;
+  int32 age = 2;
+  repeated Address addresses = 3; // Implementasi struct Address
+}

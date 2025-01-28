@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package hello;
+option go_package = "../v2"; // Menentukan path Go package
+
+// File ini hanya digunakan untuk mendefinisikan model protobuf tanpa service.
+
+message Address {
+  string street = 1;  // Street
+  string city = 2;    // City
+  string country = 3; // Country
+}
+
+message HelloRequest {
+  string name = 1;
+  int32 age = 2;
+  repeated Address addresses = 3; // List of addresses
+}
+
+message HelloResponse {
+  string name = 1;
+  int32 age = 2;
+  repeated Address addresses = 3; // List of addresses
+}
